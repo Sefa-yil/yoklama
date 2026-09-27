@@ -1,0 +1,13 @@
+{
+  "appId": "com.tiyatroakademisi.yoklama",
+  "appName": "Tiyatro Akademisi",
+  "webDir": "www",
+  "server": {
+    "url": "https://KULLANICI.github.io/REPO/",
+    "errorPath": "offline.html",
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#F2EFE8"
+  }
+}

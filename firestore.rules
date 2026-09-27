@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function rol() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/roller/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/roller/$(request.auth.uid)).data.rol
+        : 'yok';
+    }
+    function yonetici() { return rol() == 'yonetici'; }
+    function hoca() { return rol() == 'hoca' || yonetici(); }
+
+    // Programlar: herkes görür, sadece yönetici değiştirir
+    match /binalar/{id}  { allow read: if true; allow write: if yonetici(); }
+    match /bolumler/{id} { allow read: if true; allow write: if yonetici(); }
+    match /hocalar/{id}  { allow read: if true; allow write: if yonetici(); }
+    match /dersler/{id}  { allow read: if true; allow write: if yonetici(); }
+
+    // Öğrenci listeleri: sadece hoca ve yönetici görür (KVKK)
+    match /ogrenciler/{id} { allow read: if hoca(); allow write: if yonetici(); }
+
+    // Yoklamalar: hoca ve yönetici okur/yazar
+    match /yoklama/{id} { allow read, write: if hoca(); }
+
+    // Roller: kişi kendi rolünü okur; roller sadece Firebase konsolundan verilir
+    match /roller/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || yonetici());
+      allow write: if false;
+    }
+  }
+}
